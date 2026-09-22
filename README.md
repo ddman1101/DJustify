@@ -1,13 +1,10 @@
-# DJustify
+# DJustify: Reason-and-Verify DJ Planning for Pop Transitions and Story-Driven Sets
 
-**DJustify: Reason-and-Verify DJ Planning for Pop Transitions and Story-Driven Sets**
+> This repository contains the code for "DJustify: Reason-and-Verify DJ Planning for Pop Transitions and Story-Driven Sets"
+> *Submitted to the 2027 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP 2027)*
+> Wei-Han Hsu\*, Li-Jie Lin\*, Po-Hsuan Lai, Po-Hsiang Huang, Jeng-Yue Liu, Li Su, Yi-Hsuan Yang (\* equal contribution)
 
-Wei-Han Hsu\*, Li-Jie Lin\*, Po-Hsuan Lai, Po-Hsiang Huang, Jeng-Yue Liu, Li Su, Yi-Hsuan Yang
-(\* equal contribution)
-
-Submitted to ICASSP 2027.
-
-**Demo examples:** https://jamie930625.github.io/djustify/
+Demo examples: https://jamie930625.github.io/djustify/
 
 ## What this is
 
