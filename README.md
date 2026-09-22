@@ -7,7 +7,7 @@ Wei-Han Hsu\*, Li-Jie Lin\*, Po-Hsuan Lai, Po-Hsiang Huang, Jeng-Yue Liu, Li Su,
 
 Submitted to ICASSP 2027.
 
-**Audio examples:** https://jamie930625.github.io/djustify/
+**Demo examples:** https://jamie930625.github.io/djustify/
 
 ## What this is
 
