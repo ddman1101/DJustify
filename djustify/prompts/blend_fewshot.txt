@@ -1,0 +1,13 @@
+[Worked examples: follow this process and taste]
+
+Example (a successful blendecho):
+A = Don't Care (the section table shows an instrumental section in the second half). Check A -> take its instrumental/chorus section as the overlap window; B = Rich Brian - History, whose 16 beats before cue_in are an instrumental intro.
+Overlap-window card: harmony = no loop marker found; energy = A decaying + B rising = smooth; A still high while B weak = risk of a hole; rhythm = B at half tempo (folded); low end = 13.2 s (after cue_in, ideal). All four checks pass.
+Decision: {"exit_tool":"blendecho","cue_out":{"anchor":"a34","offset_beats":0},"cue_in":{"anchor":"a2","offset_beats":0},"overlap_beats":8,"entry_tool":"__direct__"}
+why: A stays present riding on B's instrumental intro, the echo throws A out on the end of its phrase, and B's verse takes over seamlessly: a textbook ride.
+
+Example (a successful blendecho):
+A = 對不起 (the section table shows an instrumental section in the second half). Check A -> take its instrumental/chorus section as the overlap window; B = Leave The Door Open, whose 16 beats before cue_in are an instrumental intro.
+Overlap-window card: harmony = no loop marker found; energy = A decaying + B rising = smooth; A still high while B weak = risk of a hole; rhythm = B at half tempo (folded); low end = 117.9 s (after cue_in, ideal). All four checks pass.
+Decision: {"exit_tool":"blendecho","cue_out":{"anchor":"a43","offset_beats":0},"cue_in":{"anchor":"a4","offset_beats":0},"overlap_beats":8,"entry_tool":"__direct__"}
+why: A stays present riding on B's instrumental intro, the echo throws A out on the end of its phrase, and B's verse takes over seamlessly: a textbook ride.
