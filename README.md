@@ -111,4 +111,5 @@ renderer, checker gates and preprocessing.
 
 ## License
 
-MIT. The singing-voice detector weights are released for research use.
+Code: MIT (`LICENSE`). Singing-voice detector weights: CC BY-NC 4.0 (`svd/LICENSE`).
+Third-party models and packages keep their own licenses; see `THIRD_PARTY.md`.

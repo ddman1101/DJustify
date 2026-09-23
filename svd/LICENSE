@@ -1,0 +1,12 @@
+The singing-voice detector weights in this folder (svdnet.pt) are released
+under the Creative Commons Attribution-NonCommercial 4.0 International
+license (CC BY-NC 4.0): https://creativecommons.org/licenses/by-nc/4.0/
+
+You may share and adapt the weights for non-commercial purposes, with
+attribution to the DJustify authors. The weights were trained on the Jamendo
+singing-voice corpus (Ramona, Richard and David, ICASSP 2008), whose tracks
+carry their own Creative Commons licenses.
+
+The source code in this folder (feats.py, model.py, train.py, infer.py,
+prep.py, precompute_voiced.py, vad_cues.py) is covered by the MIT license in
+the repository root.
