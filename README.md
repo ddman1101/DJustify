@@ -8,17 +8,100 @@ Demo examples: https://jamie930625.github.io/djustify/
 
 ## Overview
 
-DJustify is a pop AI-DJ. An LLM plans a transition (the next track, cue points, and mixing technique), the plan is rendered to audio, and a deterministic acoustic checker scores the result and sends failures back for repair. The same loop builds a story-driven set. Everything runs locally with an open-weight LLM; no music is distributed.
+DJustify is a pop AI-DJ. An LLM plans a transition (the next track, cue points
+and mixing technique), the plan is rendered to audio, and a deterministic
+acoustic checker scores the result and sends failures back for repair. The same
+loop builds a story-driven set: one track per act of a three-clause story.
 
-## Code release
+```
+your songs ──► preprocess/ ──► per-track analysis
+                                     │
+      track A ──► planner (LLM) ──► render ──► checker ──► transition.wav
+                       ▲                         │
+                       └──── what failed, how ───┘   (up to 4 rounds)
+```
 
-The code is being cleaned up and will appear here in October 2026:
+Everything runs locally against an OpenAI-compatible endpoint serving an
+open-weight LLM (we used Qwen3.6-35B-A3B, 4-bit, on one 48 GB GPU with
+llama.cpp). No music is distributed: bring your own songs.
 
-- `djustify/` — transition planner, renderer, and acoustic checker
-- `story/` — story-driven track selection for building a set
-- `preprocess/` — per-song analysis (beats, structure, key, chords, vocals, valence/arousal, cue anchors)
-- `svd/` — singing-voice detector (code and weights)
+## Layout
+
+| Path | What it is |
+|---|---|
+| `run_transition.py` | Plan, render and check one transition (fixed pair, or let the planner pick track B); `--variant` selects the paper's ablations |
+| `djustify/` | The shared engine: LLM client and prompts (`transition_core.py`), song cards and technique card (`render_plan.py`), rendering (`render_dsp.py`, `render_loop.py`), pre-render simulation and the rendered-audio gates (`plan_sim.py`, `regression_check.py`), song registry (`song_library.py`), next-track retrieval (`retrieval.py`) |
+| `story/` | Story-driven sets: `run_story_set.py`, lyric-based selection, the three listening-test stories, and an independent `verify_set.py` (its own README inside) |
+| `preprocess/` | Per-song analysis pipeline: beats, structure, key, chords, vocals, valence/arousal, cue anchors (README inside) |
+| `svd/` | The singing-voice detector: model, training code and the weights we used |
+| `prompts/zh/` | The original Chinese prompts, verbatim, as used for the listening-test stimuli |
+
+The prompts inside the code are English translations of `prompts/zh/`; the
+structure and every rule are kept, but the two are not guaranteed to produce the
+same plans.
+
+## Setup
+
+```bash
+git clone https://github.com/ddman1101/DJustify.git && cd DJustify
+conda create -n dj python=3.10 -y && conda activate dj
+pip install -r requirements.txt
+```
+
+Serve the LLM (any OpenAI-compatible server works; this is what we ran):
+
+```bash
+llama-server -m Qwen3.6-35B-A3B-UD-Q4_K_S.gguf --port 8903 -ngl 99 -c 32768 --jinja
+export AIDJ_LLM_ENDPOINT=http://127.0.0.1:8903/v1/chat/completions
+```
+
+Analyse your songs once (see `preprocess/README.md`; it needs a few extra
+environments for the third-party analysers):
+
+```bash
+export AIDJ_AUDIO=/path/to/songs
+export AIDJ_RUNTIME_ROOT=/path/to/runtime
+# ... run the stages in preprocess/README.md
+```
+
+## Transitions
+
+```bash
+python run_transition.py --list                                   # track ids
+python run_transition.py --a "<track A>" --b "<track B>"          # fixed pair (Test1 setting)
+python run_transition.py --a "<track A>"                          # planner also chooses B
+python run_transition.py --a "<track A>" --b "<track B>" --variant ours-c-r
+```
+
+`--variant ours` (default) is reasoning plus checker-driven repair, `ours-c`
+reasoning only, `ours-c-r` neither. Each run writes `trans1.wav` and
+`result.json` (the plan of every round, the planner's stated reason and the
+full scorecard) under
+`$AIDJ_RUNTIME_ROOT/dj_transition_planner/eval/variants/live_demo/<run id>/`.
+A plan that still fails a gate after four rounds is returned with
+`"green": false`; nothing is resampled or filtered.
+
+## Story-driven sets
+
+```bash
+cd story
+python run_story_set.py --story 1 --run-id story1        # one of the three listening-test stories
+python run_story_set.py --story-text "<clause one>,<clause two>,<clause three>"
+python verify_set.py <run directory>
+```
+
+Sets also need lyrics for the pool (`AIDJ_LYRICS_POOL_ROOT`, `AIDJ_CHORUS_DB`);
+`story/INPUT_DATA.md` lists every input field and `story/README.md` walks
+through how a set is built.
+
+## Checker
+
+The gates and their thresholds are in `djustify/transition_core.py`
+(`scorecard`) and `djustify/regression_check.py`. Four families: vocal, energy,
+structure, pairing. A failing gate returns the corrective action the planner
+acts on; the listening-test stimuli were the planner's returned output, whether
+or not every gate passed.
 
 ## License
 
-MIT
+MIT. The singing-voice detector weights are released for research use.

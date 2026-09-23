@@ -1,0 +1,13 @@
+# Runtime for run_transition.py and story/ (the "dj" environment).
+numpy
+scipy
+librosa
+soundfile
+requests
+pyloudnorm
+torch
+torchaudio
+demucs
+openai-whisper
+muq
+# preprocess/ stages 1, 3 and 5 need separate environments; see preprocess/README.md

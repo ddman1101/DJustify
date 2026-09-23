@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+runtime/
+outputs/
+reports/
+*.wav
+*.mp3
+*.flac
+*.npy
+*.log
+.DS_Store

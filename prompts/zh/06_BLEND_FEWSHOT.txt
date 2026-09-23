@@ -1,0 +1,13 @@
+【示範:照此流程與品味決策】
+
+範例(一次成功的 blendecho):
+A=Don't Care(段落表顯示 inst 在後半)。查 A → 取其器樂/副歌段當疊窗;B=Rich Brian - History 的 cue_in 前 16 拍是器樂 intro。
+疊窗詳情:和聲=查無循環標記;能量=A 走衰減+B 走爬升=順;A 仍高能而 B 弱=有洞風險;節奏=B為半速(摺算);低頻=13.2s(cue_in 後,理想)。四項檢核通過。
+決策:{"exit_tool":"blendecho","cue_out":{"anchor":"a34","offset_beats":0},"cue_in":{"anchor":"a2","offset_beats":0},"overlap_beats":8,"entry_tool":"__direct__"}
+why:A 保持存在騎在 B 的器樂 intro 上,A 樂句尾用 echo 送走,B 主歌無縫接管——這是正統騎乘。
+
+範例(一次成功的 blendecho):
+A=對不起(段落表顯示 inst 在後半)。查 A → 取其器樂/副歌段當疊窗;B=Leave The Door Open 的 cue_in 前 16 拍是器樂 intro。
+疊窗詳情:和聲=查無循環標記;能量=A 走衰減+B 走爬升=順;A 仍高能而 B 弱=有洞風險;節奏=B為半速(摺算);低頻=117.9s(cue_in 後,理想)。四項檢核通過。
+決策:{"exit_tool":"blendecho","cue_out":{"anchor":"a43","offset_beats":0},"cue_in":{"anchor":"a4","offset_beats":0},"overlap_beats":8,"entry_tool":"__direct__"}
+why:A 保持存在騎在 B 的器樂 intro 上,A 樂句尾用 echo 送走,B 主歌無縫接管——這是正統騎乘。
