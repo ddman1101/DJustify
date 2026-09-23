@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""共識錨點(Cue Card v3):把 樂句尾(pinst 音符+休止規則)/ 段落邊界 / 鼓進場 / bass進場 / 和聲循環重啟 / 和聲轉變 /
-人聲區間邊界 七層事件丟到同一條時間軸,±tol 內聚類 → 每個共識點記「哪幾層同意」;層數越多越像真 DJ 會下手的點。
-usage: python consensus.py [tid ...]  (無參數=有 midi 的全部)  → outputs/cue_consensus.json"""
+"""Stage 9: consensus anchors. Phrase ends (from note onsets + rests) / section boundaries / drum entries / bass entries /
+harmonic restarts / harmonic changes / vocal boundaries are put on one timeline and clustered within +-tol; each consensus point records which layers agree. The layer names are data keys read by the planner and are kept in Chinese.
+usage: python stage9_consensus.py [tid ...]  (no argument = every track with a MIDI transcription)  -> outputs/cue_consensus.json"""
 import os, sys, json, mido, numpy as np
 import os, sys
 ROOT = os.environ.get("AIDJ_RUNTIME_ROOT") or os.path.abspath("runtime")
@@ -22,7 +22,7 @@ def midi_notes(path):
     return sorted(notes)
 
 def phrase_ends(tid, notes, ceil=True):
-    """強樂句尾:onset 間距 >1.5 拍且休止 ≥0.25 拍。使用者耳測(2026-08-15)有些搶拍 → 預設吸到『其後』最近拍點(ceil),不吸最近。"""
+    """Strong phrase ends: onset gap > 1.5 beats and a rest >= 0.25 beats; snapped to the next beat (ceil), since the nearest beat was often early."""
     beat = A.beat_of(tid); bts = np.asarray(A.REG[tid]["beat_times"], float)
     out = []
     for a, b in zip(notes, notes[1:]):
@@ -46,7 +46,7 @@ def layers_of(tid):
         L["樂句尾"] = phrase_ends(tid, midi_notes(p))
     segs = reg.get("segments", [])
     L["段落邊界"] = sorted(set(round(s["start"], 2) for s in segs[1:]))
-    # 五個「語意獨立」的層(同族合併,免得人聲首/尾、鼓/bass 互相灌票):
+    # five semantically independent layers (related events are merged so vocal start/end or kick/bass do not double-vote):
     L["低頻進場"] = sorted(set(round(x, 2) for x in ce.get("kick", []) + ce.get("bass", [])))
     L["和聲事件"] = sorted(set(round(x, 2) for x in ce.get("chord_reset", []) + ce.get("chord_change", [])))
     L["人聲邊界"] = sorted(set([round(e, 2) for _, e in A.VOICED.get(tid, [])] + [round(s, 2) for s, _ in A.VOICED.get(tid, [])]))
@@ -69,7 +69,7 @@ def consensus(tid, tol_beats=0.6):
         layers = list(c["層"].keys())
         ts = [x for v in c["層"].values() for x in v]
         t = float(np.median(ts))
-        # 有樂句尾就以樂句尾為準(它是唱完的那一刻);否則取中位
+        # a phrase end wins (it is the moment the line finishes); otherwise the median
         if "樂句尾" in c["層"]: t = float(np.median(c["層"]["樂句尾"]))
         n = len(layers)
         on_db = bool(len(dbt) and np.abs(dbt - t).min() <= 0.12)
@@ -77,7 +77,7 @@ def consensus(tid, tol_beats=0.6):
     return out, L
 
 def card_field(cons, top=14):
-    """給 planner 的欄位:只上 ≥2 層的共識點(≤14 個,層數多優先,再依時間),層數=1 的各層照舊在其他欄位。"""
+    """Field for the planner: only points with >= 2 agreeing layers (at most 14, more layers first, then time); single-layer events stay in their own fields."""
     multi = [c for c in cons if c["n層"] >= 2]
     multi.sort(key=lambda c: (-c["n層"], c["t"]))
     keep = sorted(multi[:top], key=lambda c: c["t"])
@@ -89,7 +89,7 @@ if __name__ == "__main__":
     else:
         tids = sys.argv[1:] or [k for k in A.REG if os.path.isfile(f"variants/svt_pinst/{k}.mid")]
     OUT = "../outputs/cue_consensus.json"
-    res = {}   # 全量重算(檔小,避免殘留壞 key)
+    res = {}   # recompute everything (small file; avoids stale keys)
     for i, tid in enumerate(tids):
         try:
             cons, L = consensus(tid)

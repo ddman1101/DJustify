@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-"""全池聲音事件抽取 → outputs/cue_events.json
-每首:kick_entries / bass_entries / chord_resets / chord_changes(人聲與段落已在 REG/VOICED,不重複)"""
+"""Stage 7: sound events for the pool -> outputs/cue_events.json
+Per track: kick_entries / bass_entries / chord_resets / chord_changes (vocals and sections already live in the registry / voiced file)."""
 import os, sys, json
 import os, sys
 ROOT = os.environ.get("AIDJ_RUNTIME_ROOT") or os.path.abspath("runtime")

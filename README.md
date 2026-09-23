@@ -102,6 +102,13 @@ structure, pairing. A failing gate returns the corrective action the planner
 acts on; the listening-test stimuli were the planner's returned output, whether
 or not every gate passed.
 
+## Credits
+
+The transition engine grew out of Po-Hsuan Lai's earlier transition-planner
+code (retrieval and checker scaffolding); Li-Jie Lin wrote the story-set layer
+and the release refactor of the engine; Wei-Han Hsu wrote the planner prompts,
+renderer, checker gates and preprocessing.
+
 ## License
 
 MIT. The singing-voice detector weights are released for research use.

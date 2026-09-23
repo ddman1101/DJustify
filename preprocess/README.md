@@ -83,12 +83,25 @@ python stage6_cuedetr.py && python stage7_cue_events.py && python stage8_seg_env
 ## Lyrics (story sets only)
 
 The story-set planner also needs, under `$AIDJ_LYRICS_POOL_ROOT`,
-`lyrics_txt/<track>.txt` (plain lyrics) and `whisper_json/<track>.json`
-(Whisper word timestamps), plus `$AIDJ_CHORUS_DB` (title and chorus lines per
-track). We transcribed with `openai-whisper` (`large-v3`) on the vocal stem and
-corrected the text by hand against published lyrics; the chorus database was
-built from the corrected lyrics with the same LLM. These files are not
-produced by the scripts here because the corrections were manual.
+`lyrics_txt/<track>.txt` (plain lyrics), `whisper_json/<track>.json` (Whisper
+segments with timestamps) and a chorus database (`$AIDJ_CHORUS_DB`: title and
+chorus lines per track).
+
+| # | Script | Tool | Output |
+|---|---|---|---|
+| 10 | `stage10_lyrics.py` | openai-whisper `large-v3` on the vocal stem | `whisper_json/`, `lyrics_txt/` |
+| 10b | `stage10_chorus_db.py --expected-count 0 --allow-incomplete` | registry `chorus` sections over the timed lyrics | `chorus_db.json` |
+
+```bash
+export AIDJ_LYRICS_POOL_ROOT=/path/to/lyrics
+python stage10_lyrics.py                       # once per pool; GPU, about 1 min per song
+python stage10_chorus_db.py --expected-count 0 --allow-incomplete --output $AIDJ_LYRICS_POOL_ROOT/chorus_db.json
+export AIDJ_CHORUS_DB=$AIDJ_LYRICS_POOL_ROOT/chorus_db.json
+```
+
+For the listening-test pool we corrected `lyrics_txt/` by hand against
+published lyrics after transcription; the selector quotes those lines verbatim
+as evidence, so the cleaner the text, the better the selection.
 
 ## Weights
 

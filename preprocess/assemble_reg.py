@@ -1,18 +1,18 @@
 #!/usr/bin/env python
-"""Assemble — 合併各 stage → pool_analysis.json(REG schema,系統主要吃這個).
+"""Assemble: merge the stage outputs into pool_analysis.json (the registry the planner reads).
 
 Env:  dj environment (see README.md)
-輸入: stage1 struct json + stage2 va json + (可選) keys json + voiced json + 音檔資料夾
-輸出: {out_json} = REG,每首:
+Input:  stage-1 struct json + stage-2 va json + (optional) keys json + voiced json + audio folder
+Output: {out_json} = REG, per track:
   track_id,title,artist,audio_path,duration_sec,bpm,beat_times,downbeat_times,bars,
   energy{curve,times,mean,min,max,peaks,trend,current_level},
   arousal,valence,emotion_note,timbre{...},segments[{index,start,end,label,energy}],
   va_sections,va_stats{V,A},has_lyrics,tags,genre
 
-energy/timbre 用 librosa 重算(REG 輔助欄位,系統 checker 另有自算的 RMS;此處求 schema 完整)。
-segments 的每段 energy = 該段 RMS 正規化到全曲 max。
+energy/timbre are recomputed with librosa (auxiliary fields; the checker measures its own RMS).
+Per-section energy = section RMS normalised by the track maximum.
 
-用法: python assemble_reg.py <audio_dir> <struct_json> <va_json> <out_json> [--keys keys.json --voiced voiced.json]
+usage: python assemble_reg.py <audio_dir> <struct_json> <va_json> <out_json> [--keys keys.json --voiced voiced.json]
 """
 import sys, os, json, glob, argparse
 import numpy as np, librosa
@@ -85,7 +85,7 @@ def main():
                 V = [s["V"] for s in vs]; A = [s["A"] for s in vs]
                 va_stats = {"V": {"mean": round(float(np.mean(V)), 3), "max": round(float(np.max(V)), 3), "min": round(float(np.min(V)), 3)},
                             "A": {"mean": round(float(np.mean(A)), 3), "max": round(float(np.max(A)), 3), "min": round(float(np.min(A)), 3)}}
-            # title/artist:嘗試從 "NN 藝人 - 曲名 [id]" 檔名解析
+            # title/artist: parsed from a "NN artist - title [id]" file name when possible
             base = tid.split(" [")[0]
             parts = base.split(" - ", 1)
             artist = parts[0].split(" ", 1)[-1] if len(parts) == 2 else ""

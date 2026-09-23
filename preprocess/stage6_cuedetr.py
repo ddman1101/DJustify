@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-"""Cue-DETR 全池推論(ISMIR'24, ETH):真 DJ cue 標記的 learned prior。
+"""Stage 6: Cue-DETR (ISMIR'24) inference over the pool: a learned prior from real DJ cue annotations.
 
-改編自 cue-detr/cue_points.py:模型載一次、掃全池、存 JSON(時間+分數,
-sensitivity 降到 0.5 保留較多候選 — 下游由 stem 述詞裁決,這裡只出提案)。
-輸出 outputs/cuedetr.json {tid: [{"t": 秒, "score": 0-1}, ...]}
+Adapted from cue-detr/cue_points.py: load the model once, sweep the pool, save time + score
+(sensitivity lowered to 0.5 to keep more candidates; these are proposals, the downstream gates decide).
+Output: outputs/cuedetr.json {tid: [{"t": seconds, "score": 0-1}, ...]}
 usage: CUDA_VISIBLE_DEVICES=4 python cuedetr_pool.py   (env aidj,phys GPU2)
 Marker: === CUEDETR DONE ==="""
 import os, sys, json
@@ -89,7 +89,7 @@ def main():
             json.dump(done, open(OUTP, "w"))
             print(f"{i+1}/{len(todo)}", flush=True)
     json.dump(done, open(OUTP, "w"))
-    print(f"=== CUEDETR DONE === {len(done)} 首", flush=True)
+    print(f"=== CUEDETR DONE === {len(done)} tracks", flush=True)
 
 
 if __name__ == "__main__":

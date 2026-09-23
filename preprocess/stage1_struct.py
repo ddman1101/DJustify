@@ -1,15 +1,15 @@
 #!/usr/bin/env python
-"""Stage 1 — 節拍/BPM/小節線 + 段落結構(allin1fix all-in-one).
+"""Stage 1: beats / BPM / downbeats and section structure (all-in-one).
 
 Env:  allin1 environment (see README.md)
-權重: model='harmonix-all',首次執行自動下載到 torch-hub/HF cache;另用 Demucs 分軌。
-輸入: 一個資料夾的 .mp3/.wav
-輸出: {out_json}  = {track_id: {bpm, beat_times, downbeat_times, bars, segments:[{index,start,end,label}]}}
+Weights: model='harmonix-all', downloaded on first run; all-in-one separates stems with Demucs internally.
+Input:  a folder of .mp3/.wav
+Output: {out_json} = {track_id: {bpm, beat_times, downbeat_times, bars, segments:[{index,start,end,label}]}}
 
-段落標籤 = Harmonix 詞彙(start/intro/verse/chorus/bridge/inst/solo/outro/end),對得上 REG。
-energy 欄位不在這裡算(段落能量在 assemble_reg.py 用 librosa 補)。
+Section labels use the Harmonix vocabulary (start/intro/verse/chorus/bridge/inst/solo/outro/end).
+Section energy is added later by assemble_reg.py.
 
-用法: python stage1_struct.py <audio_dir> <out_json> [--device cuda]
+usage: python stage1_struct.py <audio_dir> <out_json> [--device cuda]
 """
 import sys, os, json, glob, argparse
 import numpy as np
@@ -22,7 +22,7 @@ def main():
     ap.add_argument("--device", default="cuda")
     a = ap.parse_args()
 
-    import allin1fix  # noqa: 若 import 掛在 natten/DiNAT,是 torch/natten 版本不合,非本檔問題
+    import allin1fix  # noqa: an import error in natten/DiNAT means a torch/natten version mismatch
 
     files = sorted(glob.glob(os.path.join(a.audio_dir, "*.mp3")) +
                    glob.glob(os.path.join(a.audio_dir, "*.wav")))
@@ -38,7 +38,7 @@ def main():
             downs = [float(x) for x in r.downbeats]
             segs = [{"index": i, "start": float(s.start), "end": float(s.end), "label": s.label}
                     for i, s in enumerate(r.segments)]
-            # bpm 由拍距中位數導出(與 REG 一致);allin1 也回 r.bpm 可當備援
+            # bpm from the median beat interval (as in the registry); r.bpm is the fallback
             bpm = 60.0 / float(np.median(np.diff(beats))) if len(beats) > 1 else float(r.bpm)
             out[tid] = {"bpm": round(bpm, 1), "beat_times": beats, "downbeat_times": downs,
                         "bars": len(downs), "segments": segs}

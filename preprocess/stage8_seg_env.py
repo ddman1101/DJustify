@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""全池段落 4 點包絡 + 趨勢標籤:outputs/seg_env.json
-{tid: {"segs": [{"i":0,"env":[..4..],"trend":"平穩|漸強|漸弱|fade至無聲"}...],
-       "fade_start": 秒 or null}}"""
+"""Stage 8: 4-point energy envelope and trend label per section -> outputs/seg_env.json
+{tid: {"segs": [{"i":0,"env":[..4..],"trend":"平穩|漸強|漸弱|fade至無聲"}...],   # steady | rising | falling | fade to silence (labels are read as-is by the planner)
+       "fade_start": seconds or null}}"""
 import os, sys, json
 import os, sys
 ROOT = os.environ.get("AIDJ_RUNTIME_ROOT") or os.path.abspath("runtime")
@@ -44,16 +44,16 @@ for n, tid in enumerate(tids):
             elif q[0] - q[3] > 0.15: tr = "漸弱"
             else: tr = "平穩"
             segs.append({"i": si, "env": q, "trend": tr})
-        # fade_start v2(2026-08-14 R&B Girl 校準:真 fade 起點 241s,v1 誤判 253.8 且全池 67% 過火):
-        # 平滑 dB 曲線「最後一次跌破 ref-5dB 後不再回升」的點;須總跌幅 ≥15dB、末端 ≤-25dB、跨度 ≥6s
+        # fade_start: the point after which the smoothed dB curve never climbs back above ref-5 dB;
+        # requires a total drop >= 15 dB, an ending <= -25 dB and a span >= 6 s
         fade_start = None
         db = 20 * np.log10(np.maximum(rms, 1e-6))
         ref = np.percentile(db, 90)
-        sm = np.convolve(db - ref, np.ones(20) / 20, mode="same")   # 2s 平滑,0.1s 格
+        sm = np.convolve(db - ref, np.ones(20) / 20, mode="same")   # 2 s smoothing on a 0.1 s grid
         if len(sm) > 100 and sm[-15:].mean() < -25:
             above = np.where(sm > -5)[0]
             if len(above):
-                k = int(above[-1])                                   # 最後一次還在 -5dB 之上
+                k = int(above[-1])                                   # last frame still above -5 dB
                 span = (len(sm) - k) * 0.1
                 drop = sm[k] - sm[-15:].mean()
                 if span >= 6 and drop >= 15:
@@ -66,4 +66,4 @@ for n, tid in enumerate(tids):
         print(f"{n}/{len(tids)}", flush=True)
 json.dump(res, open(OUT, "w"), ensure_ascii=False)
 nf = sum(1 for v in res.values() if v.get("fade_start"))
-print("=== SEG ENV DONE ===", len(res), "fade_start 檢出:", nf, flush=True)
+print("=== SEG ENV DONE ===", len(res), "with fade_start:", nf, flush=True)

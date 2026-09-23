@@ -178,4 +178,5 @@ if os.environ.get("DJ_POOL", "") == "exp":
         print(f"[pool] exp pool load failed: {_e}", flush=True)
 
 def in_pool(t):
-    return POOL_TIDS is None or str(t) in POOL_TIDS
+    """CAND_POOL (a JSON list of tids) and DJ_POOL both restrict the candidate pool; unset = whole registry."""
+    return (POOL_TIDS is None or str(t) in POOL_TIDS) and (POOL400 is None or str(t) in POOL400)

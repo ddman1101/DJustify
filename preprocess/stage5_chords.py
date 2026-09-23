@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-"""CREMA 全池和弦(602 類含七和弦/轉位)+ 重複進行定位。
+"""Stage 5: CREMA chords for the pool (602 classes incl. sevenths and inversions) plus the main repeated progression.
 
-跑在 venv_crema(獨立 venv,tensorflow-cpu<2.16),不依賴 narrative_cues —
-輸入用 variants/chords_manifest.json(tid → audio_path + downbeats)。
+Runs in the crema environment (tensorflow-cpu < 2.16).
+Input: variants/chords_manifest.json (tid -> audio_path + downbeats).
 
-半 bar 解析度投票:我們的 downbeat grid 對慢歌常追成半速(bar≈2 真實小節),
-CREMA 原生段落 ~1.7s 換一次;grid = downbeats + 中點,才不會抹掉 ii–V 律動。
-主循環:n∈{4,8} 的 n-gram 都試,取覆蓋率高者(排除含 N、排除單一和弦退化)。
-輸出:variants/chords_crema/{tid}.json = {segments, grid_chords, main_loop, n, occurrences, coverage}
+Votes at half-bar resolution: on slow songs the downbeat grid often runs at half speed (one grid bar = two real bars),
+while CREMA changes chords every ~1.7 s; grid = downbeats + midpoints keeps ii-V motion visible.
+Main loop: try n-grams with n in {4, 8}, keep the one with the highest coverage (no "N", no single-chord loops).
+Output: variants/chords_crema/{tid}.json = {segments, grid_chords, main_loop, n, occurrences, coverage}
 usage: CUDA_VISIBLE_DEVICES= python chords_crema.py [--shard i/n]   (venv_crema)
 Marker: === CREMA CHORDS DONE ===
 """
@@ -86,7 +86,7 @@ def main():
                        "occurrences": occ, "coverage": cover},
                       open(outp, "w"), ensure_ascii=False)
             print(f"[{i+1}/{len(tids)}] {tid.split(' [')[0][:22]:22s} "
-                  f"loop={'-'.join(loop) if loop else '無'} (n={n}) ×{len(occ)} 覆蓋{cover:.0%}", flush=True)
+                  f"loop={'-'.join(loop) if loop else 'none'} (n={n}) x{len(occ)} coverage {cover:.0%}", flush=True)
         except Exception as e:
             print(f"✗ {tid[:30]}: {str(e)[:70]}", flush=True)
     print("=== CREMA CHORDS DONE ===", flush=True)

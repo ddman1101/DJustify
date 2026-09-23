@@ -1,25 +1,25 @@
 #!/bin/bash
-# Stage 4 — 人聲區間 voiced_segments(SVD CRNN ∪ RMS-VAD,吃 demucs vocals stem)
+# Stage 4: singing-voice intervals voiced_segments (SVD CRNN union RMS VAD, on the Demucs vocal stem)
 #
 # Env:  dj environment (see README.md)
-# 模型: svd/svdnet.pt(訓練好的 CRNN 唱聲偵測;非權重不入 git,見 README「權重」)
-# 依賴: 先有 demucs vocals stem(見下 PRE),再跑既有 builder svd/precompute_voiced.py
-# 輸出: svd/voiced_segments.json = {tid: [[start,end],...]}(SVD ∪ 能量 VAD,merge_gap 0.25)
+# Model: ../svd/svdnet.pt (our trained CRNN singing-voice detector)
+# Needs: Demucs vocal stems (see PRE below); then runs ../svd/precompute_voiced.py
+# Output: svd/voiced_segments.json = {tid: [[start,end],...]} (SVD union energy VAD, merge_gap 0.25 s)
 #
-# 這一階段直接沿用 repo 既有 builder(它包了訓練模型,不重寫)。orchestrator 只負責在對的 env 呼叫它。
+# This stage only calls the existing builder in the right environment.
 #
-# 用法: bash stage4_voiced.sh
+# usage: bash stage4_voiced.sh
 set -e
 DJ=${DJ_PYTHON:-python}
 ROOT=${AIDJ_RUNTIME_ROOT:-$(pwd)/runtime}
 PLANNER=$ROOT/dj_transition_planner
 
-# PRE:確保 demucs vocals stem 存在(htdemucs)。若缺,先分軌:
+# PRE: make sure the Demucs (htdemucs) vocal stems exist; if not, separate first:
 #   $DJ -m demucs --two-stems=vocals -n htdemucs -o <stems_out> <audio...>
-# 預設 stem 路徑: $ROOT/dataset/mandarin_demucs/htdemucs/<tid>/vocals.mp3
+# default stem path: $ROOT/dataset/normalized_stems/<tid>/vocals.mp3
 
-echo "[voiced] 呼叫既有 builder: svd/precompute_voiced.py (env dj)"
+echo "[voiced] running ../svd/precompute_voiced.py (dj env)"
 cd "$PLANNER"
 CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0}" $DJ svd/precompute_voiced.py
 echo "=== STAGE4 VOICED DONE ==="
-# 產物: $PLANNER/svd/voiced_segments.json
+# output: $ROOT/dj_transition_planner/svd/voiced_segments.json

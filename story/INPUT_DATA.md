@@ -22,10 +22,10 @@ $AIDJ_RUNTIME_ROOT/
   dataset/normalized_stems/<track>/vocals.mp3   vocal stem, used by the checker
 
 $AIDJ_LYRICS_POOL_ROOT/
-  lyrics_txt/<track>.txt              plain lyrics
-  whisper_json/<track>.json           lyrics with timestamps
+  lyrics_txt/<track>.txt              plain lyrics            (preprocess/stage10_lyrics.py)
+  whisper_json/<track>.json           lyrics with timestamps  (preprocess/stage10_lyrics.py)
 
-$AIDJ_CHORUS_DB                       one JSON file: title and chorus per track
+$AIDJ_CHORUS_DB                       one JSON file: title and chorus per track (preprocess/stage10_chorus_db.py)
 ```
 
 Every file is keyed by the same track id, which is also the audio file name

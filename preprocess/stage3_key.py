@@ -1,14 +1,14 @@
 #!/usr/bin/env python
-"""Stage 3 — 調性 key + 信心值(madmom CNN key recognition).
+"""Stage 3: key and confidence (madmom CNN key recognition).
 
 Env:  allin1 environment (see README.md)
-權重: madmom 套件內建 CNN(CNNKeyRecognitionProcessor)。
-輸入: 音檔資料夾
-輸出: {out_json} = {tid: {"key": "B:min", "conf": 0.936}}   ← 消費端 agent_v0 以 root,mode=key.split(":") 解析
+Weights: the CNN bundled with madmom (CNNKeyRecognitionProcessor).
+Input:  audio folder
+Output: {out_json} = {tid: {"key": "B:min", "conf": 0.936}}   (song_library parses root, mode = key.split(":"))
 
-key 記法:sharp 拼字 + 冒號(如 "A#:maj" / "C#:min");Camelot 由消費端(agent_v0.cam)自算,不存這裡。
+Key spelling: sharps plus a colon ("A#:maj", "C#:min"); the Camelot position is derived by the consumer, not stored here.
 
-用法: python stage3_key.py <audio_dir> <out_json>
+usage: python stage3_key.py <audio_dir> <out_json>
 """
 import sys, os, json, glob
 import numpy as np
@@ -26,8 +26,8 @@ def main():
         if tid in out:
             continue
         try:
-            pred = proc(f)                                  # (24,) 機率(12 音 x 大小調)
-            label = key_prediction_to_label(pred)           # 例 "B minor"
+            pred = proc(f)                                  # (24,) probabilities (12 roots x major/minor)
+            label = key_prediction_to_label(pred)           # e.g. "B minor"
             conf = float(np.max(pred))
             key = label.replace(" major", ":maj").replace(" minor", ":min")
             out[tid] = {"key": key, "conf": round(conf, 3)}
