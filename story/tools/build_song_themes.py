@@ -45,7 +45,7 @@ LD.RUNS.setdefault("themes", {"events": [], "cond": threading.Condition(),
                               "done": False, "t0": time.time()})
 llm = S.lyric_llm_call("themes")
 
-todo = [t for t in A.REG if t not in existing]
+todo = [t for t in A.REG if t not in existing and A.in_pool(t) and t not in A.QUAR]
 print(f"Library {len(A.REG)} tracks, parsed {len(existing)}, pending {len(todo)}", flush=True)
 
 done = 0
@@ -58,7 +58,8 @@ for tid in todo:
         continue
     system, user = LS.build_theme_prompt(lyrics)
     try:
-        row = llm
+        row = llm("song theme", [{"role": "system", "content": system},
+                                 {"role": "user", "content": user}], 0.0, False)
     except Exception as exc:                       # keep going; one bad song
         print(f"  ✗ {A.REG[tid]['title'][:34]}: {exc}", flush=True)
         continue
@@ -79,10 +80,12 @@ for tid in todo:
     }
     done += 1
     if done % 20 == 0:
+        os.makedirs(os.path.dirname(OUT), exist_ok=True)
         with open(OUT, "w", encoding="utf-8") as handle:
             json.dump(existing, handle, ensure_ascii=False, indent=1)
         print(f"  {done}/{len(todo)}", flush=True)
 
+os.makedirs(os.path.dirname(OUT), exist_ok=True)
 with open(OUT, "w", encoding="utf-8") as handle:
     json.dump(existing, handle, ensure_ascii=False, indent=1)
 

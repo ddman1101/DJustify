@@ -22,7 +22,7 @@ POOL_ROOT = Path(
 CHORUS_DATABASES = (
     Path(os.environ.get("AIDJ_CHORUS_DB", str(REPO_ROOT / "chorus_db.json"))),
 )
-GAG_PROMPT_PATH = REPO_ROOT / "prompts" / "lyric_hook_system.txt"
+GAG_PROMPT_PATH = Path(os.environ.get("AIDJ_GAG_PROMPT", str(Path(__file__).resolve().parent / "prompts" / "lyric_hook_system.txt")))
 GAG_LRC_ROOT = Path(os.environ.get("AIDJ_LRC_ROOT", str(POOL_ROOT / "lyrics_lrc")))
 LLMCall = Callable[[str, list[dict[str, str]], float, bool], dict[str, Any] | None]
 
@@ -662,7 +662,8 @@ def act_subject_verdict(description: str, tid: str, catalog: "LyricCatalog",
         return None
     system, user = build_act_subject_prompt(description, lyrics)
     try:
-        row = llm_call
+        row = llm_call("act subject", [{"role": "system", "content": system},
+                                       {"role": "user", "content": user}], 0.0, False)
     except Exception:
         return None
     if not isinstance(row, dict) or "verdict" not in row:

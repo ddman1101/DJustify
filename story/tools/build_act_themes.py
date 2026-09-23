@@ -105,7 +105,8 @@ for number, story in sorted(STORIES.items()):
                        else max(attempts, key=lambda a: a[0]))[1]
             if row.get("required_relations"):
                 sys_p, usr_p = LS.build_act_relation_prompt(description)
-                check = llm
+                check = llm("act relation check", [{"role": "system", "content": sys_p},
+                                                    {"role": "user", "content": usr_p}], 0.0, False)
                 if isinstance(check, dict) and not check.get("required_relations"):
                     print(f"      (The text of this act does not specify character relationships,"
                           f"Remove requirement for {'、'.join(row['required_relations'])}")
@@ -114,6 +115,7 @@ for number, story in sorted(STORIES.items()):
             store[key] = row
             LS._ACT_THEME_STORE = store
             row["pool"] = pool_size(description)
+            os.makedirs(os.path.dirname(out), exist_ok=True)
             with open(out, "w", encoding="utf-8") as handle:
                 json.dump(store, handle, ensure_ascii=False, indent=1)
         themes = "、".join(row.get("themes") or [])
